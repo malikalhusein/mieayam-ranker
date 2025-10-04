@@ -6,13 +6,15 @@ import RadarChart from "@/components/RadarChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Calendar, DollarSign, Clock, ArrowLeft, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Clock, ArrowLeft, ExternalLink, Image as ImageIcon, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ReviewDetail = () => {
   const { id } = useParams();
   const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [generatingScorecard, setGeneratingScorecard] = useState(false);
+  const [scorecardImage, setScorecardImage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,6 +68,49 @@ const ReviewDetail = () => {
     if (price <= 15000) return { label: "Resto Menengah", stars: 4 };
     if (price <= 20000) return { label: "Cukup Mahal", stars: 5 };
     return { label: "Mahal", stars: 6 };
+  };
+
+  const generateScorecard = async () => {
+    if (!review) return;
+
+    setGeneratingScorecard(true);
+    setScorecardImage(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-scorecard', {
+        body: { review }
+      });
+
+      if (error) throw error;
+
+      if (data?.imageUrl) {
+        setScorecardImage(data.imageUrl);
+        toast({
+          title: "Scorecard Generated!",
+          description: "Your scorecard image is ready to download.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error generating scorecard:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate scorecard",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingScorecard(false);
+    }
+  };
+
+  const downloadScorecard = () => {
+    if (!scorecardImage) return;
+
+    const link = document.createElement('a');
+    link.href = scorecardImage;
+    link.download = `${review.outlet_name.replace(/\s+/g, '-')}-scorecard.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -189,6 +234,43 @@ const ReviewDetail = () => {
 
           {/* Right Column - Scores */}
           <div className="space-y-6">
+            {/* Generate Scorecard Button */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-3">Generate Scorecard</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Buat gambar scorecard untuk dibagikan di media sosial
+                </p>
+                <Button 
+                  onClick={generateScorecard} 
+                  disabled={generatingScorecard}
+                  className="w-full"
+                  size="lg"
+                >
+                  <ImageIcon className="mr-2 h-5 w-5" />
+                  {generatingScorecard ? "Generating..." : "Generate Scorecard"}
+                </Button>
+
+                {scorecardImage && (
+                  <div className="mt-4 space-y-3">
+                    <img 
+                      src={scorecardImage} 
+                      alt="Generated Scorecard"
+                      className="w-full rounded-lg border"
+                    />
+                    <Button 
+                      onClick={downloadScorecard}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Scorecard
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Radar Chart */}
             <Card>
               <CardContent className="p-6">
