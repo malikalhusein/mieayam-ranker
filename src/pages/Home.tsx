@@ -4,13 +4,19 @@ import Navbar from "@/components/Navbar";
 import ReviewCard from "@/components/ReviewCard";
 import PerceptualMap from "@/components/PerceptualMap";
 import { Button } from "@/components/ui/button";
-import { Trophy, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trophy, TrendingUp, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [topReviews, setTopReviews] = useState<any[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +39,7 @@ const Home = () => {
       }));
 
       setReviews(processedReviews);
+      setFilteredReviews(processedReviews);
       
       // Get top 5 based on score
       const sorted = [...processedReviews].sort((a, b) => b.totalScore - a.totalScore);
@@ -71,10 +78,37 @@ const Home = () => {
     return ((avgRasa + scores.fasilitas) / review.price) * 1000;
   };
 
+  useEffect(() => {
+    let filtered = reviews;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(r => 
+        r.outlet_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.city.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by city
+    if (cityFilter !== "all") {
+      filtered = filtered.filter(r => r.city === cityFilter);
+    }
+
+    // Filter by type
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(r => r.product_type === typeFilter);
+    }
+
+    setFilteredReviews(filtered);
+  }, [searchTerm, cityFilter, typeFilter, reviews]);
+
+  const cities = Array.from(new Set(reviews.map(r => r.city)));
+
   const perceptualData = reviews.map(r => ({
     name: r.outlet_name,
-    complexity: r.complexity || 5,
-    sweetness: r.sweetness || 5,
+    complexity: (r.complexity || 5) - 5, // Center at 0: convert 0-10 to -5 to 5
+    sweetness: (r.sweetness || 5) - 5,   // Center at 0: convert 0-10 to -5 to 5
     type: r.product_type,
   }));
 
@@ -156,13 +190,51 @@ const Home = () => {
       <section className="container py-16">
         <h2 className="text-3xl font-bold mb-8 text-center">Semua Review</h2>
         
-        {reviews.length === 0 ? (
+        {/* Filters */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari nama outlet, alamat, kota..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter Kota" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kota</SelectItem>
+              {cities.map(city => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter Tipe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Tipe</SelectItem>
+              <SelectItem value="kuah">Kuah</SelectItem>
+              <SelectItem value="goreng">Goreng</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {filteredReviews.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">Belum ada review tersedia</p>
+            <p className="text-muted-foreground text-lg">
+              {reviews.length === 0 ? "Belum ada review tersedia" : "Tidak ada review yang sesuai dengan filter"}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reviews.map((review) => (
+            {filteredReviews.map((review) => (
               <ReviewCard
                 key={review.id}
                 id={review.id}

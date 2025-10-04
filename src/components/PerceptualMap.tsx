@@ -19,23 +19,25 @@ const PerceptualMap = ({ data }: PerceptualMapProps) => {
         Visualisasi kompleksitas rasa vs tingkat kemanisan
       </p>
       
-      <ResponsiveContainer width="100%" height={400}>
-        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+      <ResponsiveContainer width="100%" height={500}>
+        <ScatterChart margin={{ top: 30, right: 30, bottom: 60, left: 60 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis 
             type="number" 
             dataKey="complexity" 
             name="Complexity" 
-            domain={[0, 10]}
-            label={{ value: 'Complexity', position: 'insideBottom', offset: -10, fill: "hsl(var(--foreground))" }}
+            domain={[-5, 5]}
+            ticks={[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]}
+            label={{ value: 'Complexity', position: 'insideBottom', offset: -15, fill: "hsl(var(--foreground))", fontSize: 14 }}
             tick={{ fill: "hsl(var(--foreground))" }}
           />
           <YAxis 
             type="number" 
             dataKey="sweetness" 
             name="Sweetness" 
-            domain={[0, 10]}
-            label={{ value: 'Sweetness', angle: -90, position: 'insideLeft', fill: "hsl(var(--foreground))" }}
+            domain={[-5, 5]}
+            ticks={[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]}
+            label={{ value: 'Sweetness', angle: -90, position: 'insideLeft', offset: -10, fill: "hsl(var(--foreground))", fontSize: 14 }}
             tick={{ fill: "hsl(var(--foreground))" }}
           />
           <Tooltip 
@@ -55,7 +57,11 @@ const PerceptualMap = ({ data }: PerceptualMapProps) => {
               return null;
             }}
           />
-          <Legend />
+          <Legend 
+            verticalAlign="top" 
+            height={36}
+            wrapperStyle={{ paddingBottom: '20px' }}
+          />
           <Scatter name="Kuah" data={data.filter(d => d.type === "kuah")} fill="hsl(var(--primary))">
             {data.filter(d => d.type === "kuah").map((entry, index) => (
               <Cell key={`kuah-${index}`} fill="hsl(var(--primary))" />

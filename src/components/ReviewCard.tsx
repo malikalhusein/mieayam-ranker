@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { MapPin, Calendar, DollarSign } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
-import RadarChart from "./RadarChart";
 
 interface ReviewCardProps {
   id: string;
@@ -76,12 +75,8 @@ const ReviewCard = ({ id, outlet_name, address, city, visit_date, price, product
         </CardHeader>
         
         <CardContent>
-          <div className="mb-4">
-            <RadarChart data={scores} size="small" />
-          </div>
-          
           {notes && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-3">
               {notes}
             </p>
           )}

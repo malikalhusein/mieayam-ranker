@@ -172,7 +172,7 @@ const ReviewDetail = () => {
                   {review.service_durasi && (
                     <div className="flex items-center">
                       <Clock className="mr-2 h-5 w-5" />
-                      <span>Waktu Penyajian: {Math.floor(review.service_durasi / 60)} menit {review.service_durasi % 60} detik</span>
+                      <span>Waktu Penyajian: {review.service_durasi} menit</span>
                     </div>
                   )}
                 </div>
