@@ -28,6 +28,7 @@ export type Database = {
           google_map_url: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           kuah_aroma: number | null
           kuah_kaldu: number | null
           kuah_kekentalan: number | null
@@ -36,6 +37,7 @@ export type Database = {
           mie_tipe: string | null
           notes: string | null
           outlet_name: string
+          overall_score: number | null
           price: number
           product_type: string
           service_durasi: number | null
@@ -56,6 +58,7 @@ export type Database = {
           google_map_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           kuah_aroma?: number | null
           kuah_kaldu?: number | null
           kuah_kekentalan?: number | null
@@ -64,6 +67,7 @@ export type Database = {
           mie_tipe?: string | null
           notes?: string | null
           outlet_name: string
+          overall_score?: number | null
           price: number
           product_type: string
           service_durasi?: number | null
@@ -84,6 +88,7 @@ export type Database = {
           google_map_url?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           kuah_aroma?: number | null
           kuah_kaldu?: number | null
           kuah_kekentalan?: number | null
@@ -92,6 +97,7 @@ export type Database = {
           mie_tipe?: string | null
           notes?: string | null
           outlet_name?: string
+          overall_score?: number | null
           price?: number
           product_type?: string
           service_durasi?: number | null

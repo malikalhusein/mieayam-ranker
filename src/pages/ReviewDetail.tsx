@@ -6,6 +6,7 @@ import RadarChart from "@/components/RadarChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { MapPin, Calendar, DollarSign, Clock, ArrowLeft, ExternalLink, Image as ImageIcon, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -155,13 +156,28 @@ const ReviewDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Image & Info */}
           <div className="space-y-6">
-            {review.image_url && (
+            {/* Image Carousel */}
+            {((review.image_urls && review.image_urls.length > 0) || review.image_url) && (
               <Card className="overflow-hidden">
-                <img 
-                  src={review.image_url} 
-                  alt={review.outlet_name}
-                  className="w-full h-96 object-cover"
-                />
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {(review.image_urls && review.image_urls.length > 0 ? review.image_urls.slice(0, 6) : [review.image_url]).map((imgUrl: string, index: number) => (
+                      <CarouselItem key={index}>
+                        <img 
+                          src={imgUrl} 
+                          alt={`${review.outlet_name} - ${index + 1}`}
+                          className="w-full h-96 object-cover"
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {((review.image_urls && review.image_urls.length > 1) || (!review.image_urls && review.image_url)) && (
+                    <>
+                      <CarouselPrevious className="left-4" />
+                      <CarouselNext className="right-4" />
+                    </>
+                  )}
+                </Carousel>
               </Card>
             )}
 
@@ -169,9 +185,16 @@ const ReviewDetail = () => {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <h1 className="text-3xl font-bold">{review.outlet_name}</h1>
-                  <Badge variant={review.product_type === "kuah" ? "default" : "secondary"}>
-                    {review.product_type === "kuah" ? "Kuah" : "Goreng"}
-                  </Badge>
+                  <div className="flex gap-2 items-center">
+                    <Badge variant={review.product_type === "kuah" ? "default" : "secondary"}>
+                      {review.product_type === "kuah" ? "Kuah" : "Goreng"}
+                    </Badge>
+                    {review.overall_score && (
+                      <Badge className="bg-primary text-primary-foreground font-bold text-2xl px-4 py-2">
+                        {review.overall_score.toFixed(1)}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-3 text-muted-foreground">
@@ -271,9 +294,17 @@ const ReviewDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Radar Chart */}
+            {/* Overall Score & Radar Chart */}
             <Card>
               <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Overall Score</h2>
+                  {review.overall_score && (
+                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary text-primary-foreground">
+                      <span className="text-4xl font-bold">{review.overall_score.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
                 <h2 className="text-2xl font-bold mb-4 text-center">Ringkasan Skor</h2>
                 <RadarChart data={review.scores} size="large" />
               </CardContent>

@@ -169,6 +169,8 @@ const Home = () => {
                   product_type={review.product_type}
                   notes={review.notes}
                   image_url={review.image_url}
+                  image_urls={review.image_urls}
+                  overall_score={review.overall_score}
                   scores={review.scores}
                 />
               </div>
@@ -246,6 +248,8 @@ const Home = () => {
                 product_type={review.product_type}
                 notes={review.notes}
                 image_url={review.image_url}
+                image_urls={review.image_urls}
+                overall_score={review.overall_score}
                 scores={review.scores}
               />
             ))}
