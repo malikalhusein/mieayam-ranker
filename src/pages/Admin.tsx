@@ -46,6 +46,10 @@ const Admin = () => {
   const [submitting, setSubmitting] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [editingReview, setEditingReview] = useState<any>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -59,6 +63,26 @@ const Admin = () => {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchReviews();
+    }
+  }, [user]);
+
+  const fetchReviews = async () => {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast({ title: "Error loading reviews", variant: "destructive" });
+      return;
+    }
+
+    setReviews(data || []);
+  };
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -85,6 +109,68 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const startEdit = (review: any) => {
+    setEditingReview(review);
+    setShowCreateForm(false);
+    
+    // Populate form with existing data
+    form.reset({
+      outlet_name: review.outlet_name,
+      address: review.address,
+      city: review.city,
+      visit_date: review.visit_date,
+      price: review.price.toString(),
+      product_type: review.product_type,
+      mie_tipe: review.mie_tipe || "",
+      google_map_url: review.google_map_url || "",
+      notes: review.notes || "",
+      fasilitas_kebersihan: review.fasilitas_kebersihan,
+      fasilitas_alat_makan: review.fasilitas_alat_makan,
+      fasilitas_tempat: review.fasilitas_tempat,
+      service_durasi: review.service_durasi,
+      complexity: review.complexity,
+      sweetness: review.sweetness,
+      kuah_kekentalan: review.kuah_kekentalan,
+      kuah_kaldu: review.kuah_kaldu,
+      kuah_keseimbangan: review.kuah_keseimbangan,
+      kuah_aroma: review.kuah_aroma,
+      mie_tekstur: review.mie_tekstur,
+      ayam_bumbu: review.ayam_bumbu,
+      ayam_potongan: review.ayam_potongan,
+    });
+
+    // Set existing images
+    setExistingImageUrls(review.image_urls || []);
+    setImageFiles([]);
+    setImagePreviews([]);
+  };
+
+  const cancelEdit = () => {
+    setEditingReview(null);
+    setShowCreateForm(false);
+    form.reset();
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImageUrls([]);
+  };
+
+  const deleteReview = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus review ini?")) return;
+
+    const { error } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Error deleting review", variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "Review berhasil dihapus" });
+    fetchReviews();
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -92,7 +178,9 @@ const Admin = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + imageFiles.length > 6) {
+    const totalImages = existingImageUrls.length + imageFiles.length + files.length;
+    
+    if (totalImages > 6) {
       toast({ title: "Maksimal 6 gambar", variant: "destructive" });
       return;
     }
@@ -106,6 +194,10 @@ const Admin = () => {
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const removeExistingImage = (url: string) => {
+    setExistingImageUrls(existingImageUrls.filter(u => u !== url));
   };
 
   const removeImage = (index: number) => {
@@ -138,6 +230,82 @@ const Admin = () => {
   };
 
   const onSubmit = async (data: ReviewFormData) => {
+    if (editingReview) {
+      await handleUpdate(data);
+    } else {
+      await handleCreate(data);
+    }
+  };
+
+  const handleUpdate = async (data: ReviewFormData) => {
+    setSubmitting(true);
+    try {
+      const newImageUrls = await uploadImages();
+      const allImageUrls = [...existingImageUrls, ...newImageUrls];
+
+      const reviewData = {
+        outlet_name: data.outlet_name,
+        address: data.address,
+        city: data.city,
+        visit_date: data.visit_date,
+        price: parseInt(data.price),
+        product_type: data.product_type,
+        mie_tipe: data.mie_tipe || null,
+        google_map_url: data.google_map_url || null,
+        notes: data.notes || null,
+        image_urls: allImageUrls,
+        fasilitas_kebersihan: data.fasilitas_kebersihan || null,
+        fasilitas_alat_makan: data.fasilitas_alat_makan || null,
+        fasilitas_tempat: data.fasilitas_tempat || null,
+        service_durasi: data.service_durasi || null,
+        complexity: data.complexity || null,
+        sweetness: data.sweetness || null,
+        kuah_kekentalan: data.kuah_kekentalan || null,
+        kuah_kaldu: data.kuah_kaldu || null,
+        kuah_keseimbangan: data.kuah_keseimbangan || null,
+        kuah_aroma: data.kuah_aroma || null,
+        mie_tekstur: data.mie_tekstur || null,
+        ayam_bumbu: data.ayam_bumbu || null,
+        ayam_potongan: data.ayam_potongan || null,
+      };
+
+      // Calculate overall score
+      const kuahScore = data.product_type === "kuah" 
+        ? ((data.kuah_kekentalan || 0) + (data.kuah_kaldu || 0) + (data.kuah_keseimbangan || 0) + (data.kuah_aroma || 0)) / 4
+        : 0;
+      const mieScore = data.mie_tekstur || 0;
+      const ayamScore = ((data.ayam_bumbu || 0) + (data.ayam_potongan || 0)) / 2;
+      const fasilitasScore = ((data.fasilitas_kebersihan || 0) + (data.fasilitas_alat_makan || 0) + (data.fasilitas_tempat || 0)) / 3;
+      
+      let overallScore: number;
+      if (data.product_type === "kuah") {
+        overallScore = (kuahScore * 0.3) + (mieScore * 0.3) + (ayamScore * 0.25) + (fasilitasScore * 0.15);
+      } else {
+        overallScore = (mieScore * 0.4) + (ayamScore * 0.4) + (fasilitasScore * 0.2);
+      }
+
+      const { error } = await supabase
+        .from("reviews")
+        .update({ ...reviewData, overall_score: overallScore })
+        .eq("id", editingReview.id);
+
+      if (error) throw error;
+
+      toast({ title: "Review berhasil diupdate!" });
+      cancelEdit();
+      fetchReviews();
+    } catch (error: any) {
+      toast({ 
+        title: "Error", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCreate = async (data: ReviewFormData) => {
     setSubmitting(true);
     try {
       const imageUrls = await uploadImages();
@@ -197,9 +365,8 @@ const Admin = () => {
         .eq("id", review.id);
 
       toast({ title: "Review berhasil dibuat!" });
-      form.reset();
-      setImageFiles([]);
-      setImagePreviews([]);
+      cancelEdit();
+      fetchReviews();
     } catch (error: any) {
       toast({ 
         title: "Error", 
@@ -217,7 +384,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle p-8">
-      <div className="container max-w-4xl">
+      <div className="container max-w-6xl">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
           <Button onClick={handleLogout} variant="outline">
@@ -226,11 +393,82 @@ const Admin = () => {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Buat Review Baru</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {!showCreateForm && !editingReview && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Daftar Review</h2>
+              <Button onClick={() => setShowCreateForm(true)}>
+                Buat Review Baru
+              </Button>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-4 py-3 text-left">Outlet</th>
+                        <th className="px-4 py-3 text-left">Kota</th>
+                        <th className="px-4 py-3 text-left">Tipe</th>
+                        <th className="px-4 py-3 text-left">Score</th>
+                        <th className="px-4 py-3 text-left">Tanggal</th>
+                        <th className="px-4 py-3 text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviews.map((review) => (
+                        <tr key={review.id} className="border-b hover:bg-muted/50">
+                          <td className="px-4 py-3">{review.outlet_name}</td>
+                          <td className="px-4 py-3">{review.city}</td>
+                          <td className="px-4 py-3">
+                            <span className="capitalize">{review.product_type}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {review.overall_score ? review.overall_score.toFixed(1) : '-'}
+                          </td>
+                          <td className="px-4 py-3">
+                            {new Date(review.visit_date).toLocaleDateString('id-ID')}
+                          </td>
+                          <td className="px-4 py-3 text-right space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => startEdit(review)}
+                            >
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => deleteReview(review.id)}
+                            >
+                              Hapus
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {(showCreateForm || editingReview) && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">
+                {editingReview ? "Edit Review" : "Buat Review Baru"}
+              </h2>
+              <Button variant="outline" onClick={cancelEdit}>
+                Batal
+              </Button>
+            </div>
+
+            <Card>
+              <CardContent className="pt-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
@@ -317,6 +555,21 @@ const Admin = () => {
                 <h3 className="text-lg font-semibold">Gambar (max 6)</h3>
                 
                 <div className="grid grid-cols-3 gap-4">
+                  {existingImageUrls.map((url, index) => (
+                    <div key={`existing-${index}`} className="relative">
+                      <img src={url} alt={`Existing ${index + 1}`} className="w-full h-32 object-cover rounded" />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() => removeExistingImage(url)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+
                   {imagePreviews.map((preview, index) => (
                     <div key={index} className="relative">
                       <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-32 object-cover rounded" />
@@ -332,7 +585,7 @@ const Admin = () => {
                     </div>
                   ))}
                   
-                  {imageFiles.length < 6 && (
+                  {(existingImageUrls.length + imageFiles.length) < 6 && (
                     <label className="border-2 border-dashed rounded h-32 flex items-center justify-center cursor-pointer hover:bg-muted/50">
                       <div className="text-center">
                         <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -442,12 +695,14 @@ const Admin = () => {
                 )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Menyimpan..." : "Buat Review"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? "Menyimpan..." : editingReview ? "Update Review" : "Buat Review"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        )}
       </div>
     </div>
   );
