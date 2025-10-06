@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Upload, X } from "lucide-react";
+import { LogOut, Upload, X, Home } from "lucide-react";
 
 const reviewSchema = z.object({
   outlet_name: z.string().min(1, "Nama outlet wajib diisi"),
@@ -387,10 +387,16 @@ const Admin = () => {
       <div className="container max-w-6xl">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/")} variant="outline">
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </Button>
+            <Button onClick={handleLogout} variant="outline">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {!showCreateForm && !editingReview && (
