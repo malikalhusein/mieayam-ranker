@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, DollarSign, Star } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import RadarChart from "./RadarChart";
@@ -58,7 +59,28 @@ const ReviewCard = ({
   ayam_bumbu
 }: ReviewCardProps) => {
   const priceCategory = getPriceCategory(price);
-  const displayImage = (image_urls && image_urls.length > 0) ? image_urls[0] : image_url;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Prepare image array
+  const images = image_urls && image_urls.length > 0 
+    ? image_urls 
+    : image_url 
+      ? [image_url] 
+      : [];
+  
+  const hasMultipleImages = images.length > 1;
+  
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+  
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
   
   // Prepare radar chart data if detailed scores are available
   const hasDetailedScores = kuah_kekentalan !== undefined || mie_tekstur !== undefined || ayam_bumbu !== undefined;
@@ -72,13 +94,48 @@ const ReviewCard = ({
   return (
     <Link to={`/review/${id}`}>
       <Card className="group h-full flex flex-col overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer">
-        {displayImage && (
+        {images.length > 0 && (
           <div className="relative aspect-[4/3] overflow-hidden bg-muted">
             <img 
-              src={displayImage} 
+              src={images[currentImageIndex]} 
               alt={outlet_name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
+            
+            {/* Navigation arrows */}
+            {hasMultipleImages && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-all"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-all"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                
+                {/* Image indicators */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                  {images.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1.5 w-1.5 rounded-full transition-all ${
+                        index === currentImageIndex 
+                          ? 'bg-white w-4' 
+                          : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            
             <div className="absolute top-2 right-2 flex gap-2">
               <Badge variant={product_type === "kuah" ? "default" : "secondary"} className="shadow-md">
                 {product_type === "kuah" ? "Kuah" : "Goreng"}
@@ -101,7 +158,7 @@ const ReviewCard = ({
             <h3 className="text-lg md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
               {outlet_name}
             </h3>
-            {overall_score && !displayImage && (
+            {overall_score && images.length === 0 && (
               <div className="flex items-center gap-1 bg-primary text-primary-foreground px-2 py-1 rounded-full">
                 <Star className="h-3 w-3 fill-current" />
                 <span className="text-sm font-bold">{overall_score.toFixed(1)}</span>

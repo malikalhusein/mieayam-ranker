@@ -12,13 +12,30 @@ interface RadarChartProps {
 
 const RadarChart = ({ data, size = "large" }: RadarChartProps) => {
   const chartData = [
-    { subject: "Kuah", value: data.kuah },
-    { subject: "Mie", value: data.mie },
-    { subject: "Ayam", value: data.ayam },
-    { subject: "Fasilitas", value: data.fasilitas },
+    { subject: "kuah", value: data.kuah, icon: "🍜" },
+    { subject: "mie", value: data.mie, icon: "🍝" },
+    { subject: "ayam", value: data.ayam, icon: "🍗" },
+    { subject: "fasilitas", value: data.fasilitas, icon: "🏠" },
   ];
 
-  const height = size === "small" ? 200 : 400;
+  const height = size === "small" ? 150 : 400;
+
+  const CustomTick = ({ payload, x, y, textAnchor }: any) => {
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        textAnchor={textAnchor} 
+        fill="hsl(var(--foreground))" 
+        fontSize={size === "small" ? 16 : 20}
+      >
+        {payload.value === "kuah" && "🍜"}
+        {payload.value === "mie" && "🍝"}
+        {payload.value === "ayam" && "🍗"}
+        {payload.value === "fasilitas" && "🏠"}
+      </text>
+    );
+  };
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -26,14 +43,14 @@ const RadarChart = ({ data, size = "large" }: RadarChartProps) => {
         <PolarGrid stroke="hsl(var(--border))" />
         <PolarAngleAxis 
           dataKey="subject" 
-          tick={{ fill: "hsl(var(--foreground))", fontSize: size === "small" ? 12 : 14 }}
+          tick={<CustomTick />}
         />
         <Radar
           name="Skor"
           dataKey="value"
           stroke="hsl(var(--primary))"
           fill="hsl(var(--primary))"
-          fillOpacity={0.6}
+          fillOpacity={0.5}
         />
         {size === "large" && <Legend />}
       </RechartsRadarChart>
