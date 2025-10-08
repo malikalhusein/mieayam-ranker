@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, DollarSign } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Star } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
+import RadarChart from "./RadarChart";
 
 interface ReviewCardProps {
   id: string;
@@ -21,6 +22,11 @@ interface ReviewCardProps {
     ayam: number;
     fasilitas: number;
   };
+  kuah_kekentalan?: number;
+  kuah_kaldu?: number;
+  kuah_keseimbangan?: number;
+  mie_tekstur?: number;
+  ayam_bumbu?: number;
 }
 
 const getPriceCategory = (price: number) => {
@@ -32,73 +38,108 @@ const getPriceCategory = (price: number) => {
   return { label: "Mahal", stars: 6 };
 };
 
-const ReviewCard = ({ id, outlet_name, address, city, visit_date, price, product_type, notes, image_url, image_urls, overall_score, scores }: ReviewCardProps) => {
+const ReviewCard = ({ 
+  id, 
+  outlet_name, 
+  address, 
+  city, 
+  visit_date, 
+  price, 
+  product_type, 
+  notes, 
+  image_url, 
+  image_urls, 
+  overall_score, 
+  scores,
+  kuah_kekentalan,
+  kuah_kaldu,
+  kuah_keseimbangan,
+  mie_tekstur,
+  ayam_bumbu
+}: ReviewCardProps) => {
   const priceCategory = getPriceCategory(price);
   const displayImage = (image_urls && image_urls.length > 0) ? image_urls[0] : image_url;
   
+  // Prepare radar chart data if detailed scores are available
+  const hasDetailedScores = kuah_kekentalan !== undefined || mie_tekstur !== undefined || ayam_bumbu !== undefined;
+  const radarData = hasDetailedScores ? {
+    kuah: kuah_kekentalan || kuah_kaldu || kuah_keseimbangan || 0,
+    mie: mie_tekstur || 0,
+    ayam: ayam_bumbu || 0,
+    fasilitas: scores.fasilitas || 0,
+  } : null;
+  
   return (
     <Link to={`/review/${id}`}>
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-1 cursor-pointer">
+      <Card className="group h-full flex flex-col overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer">
         {displayImage && (
-          <div className="relative h-48 overflow-hidden bg-muted">
+          <div className="relative aspect-[4/3] overflow-hidden bg-muted">
             <img 
               src={displayImage} 
               alt={outlet_name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
             <div className="absolute top-2 right-2 flex gap-2">
-              <Badge variant={product_type === "kuah" ? "default" : "secondary"}>
+              <Badge variant={product_type === "kuah" ? "default" : "secondary"} className="shadow-md">
                 {product_type === "kuah" ? "Kuah" : "Goreng"}
               </Badge>
-              {overall_score && (
-                <Badge className="bg-primary/90 text-primary-foreground font-bold text-base px-3 py-1">
-                  {overall_score.toFixed(1)}
-                </Badge>
-              )}
+              <Badge variant="outline" className="bg-background/90 backdrop-blur-sm shadow-md">
+                {priceCategory.label}
+              </Badge>
             </div>
+            {overall_score && (
+              <div className="absolute top-2 left-2 flex items-center gap-1 bg-primary/90 text-primary-foreground px-2 py-1 rounded-full shadow-md">
+                <Star className="h-3 w-3 fill-current" />
+                <span className="text-sm font-bold">{overall_score.toFixed(1)}</span>
+              </div>
+            )}
           </div>
         )}
         
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+        <CardHeader className="flex-shrink-0">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-lg md:text-xl font-bold group-hover:text-primary transition-colors line-clamp-1">
               {outlet_name}
             </h3>
             {overall_score && !displayImage && (
-              <Badge className="bg-primary text-primary-foreground font-bold text-lg px-3 py-1">
-                {overall_score.toFixed(1)}
-              </Badge>
+              <div className="flex items-center gap-1 bg-primary text-primary-foreground px-2 py-1 rounded-full">
+                <Star className="h-3 w-3 fill-current" />
+                <span className="text-sm font-bold">{overall_score.toFixed(1)}</span>
+              </div>
             )}
           </div>
-          <div className="flex flex-col space-y-1 text-sm text-muted-foreground">
+          <div className="flex flex-col space-y-1 text-xs md:text-sm text-muted-foreground">
             <div className="flex items-center">
-              <MapPin className="mr-1 h-4 w-4" />
+              <MapPin className="mr-1 h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
               <span className="truncate">{city}</span>
             </div>
             <div className="flex items-center">
-              <Calendar className="mr-1 h-4 w-4" />
+              <Calendar className="mr-1 h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
               <span>{new Date(visit_date).toLocaleDateString('id-ID')}</span>
             </div>
             <div className="flex items-center">
-              <DollarSign className="mr-1 h-4 w-4" />
+              <DollarSign className="mr-1 h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
               <span>Rp {price.toLocaleString('id-ID')}</span>
-              <Badge variant="outline" className="ml-2 text-xs">
-                {priceCategory.label}
-              </Badge>
             </div>
           </div>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="flex-grow flex flex-col">
           {notes && (
-            <p className="text-sm text-muted-foreground line-clamp-3">
+            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-3">
               {notes}
             </p>
           )}
+          
+          {radarData && (
+            <div className="mt-auto">
+              <RadarChart data={radarData} size="small" />
+            </div>
+          )}
         </CardContent>
         
-        <CardFooter>
-          <span className="text-sm font-medium text-primary">
+        <CardFooter className="pt-0">
+          <span className="text-xs md:text-sm font-medium text-primary">
             Lihat Detail →
           </span>
         </CardFooter>

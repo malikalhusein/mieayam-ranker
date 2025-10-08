@@ -19,8 +19,8 @@ const PerceptualMap = ({ data }: PerceptualMapProps) => {
         Visualisasi kompleksitas rasa vs tingkat kemanisan
       </p>
       
-      <ResponsiveContainer width="100%" height={500}>
-        <ScatterChart margin={{ top: 30, right: 30, bottom: 60, left: 60 }}>
+      <ResponsiveContainer width="100%" height={400}>
+        <ScatterChart margin={{ top: 20, right: 20, bottom: 50, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis 
             type="number" 
@@ -28,8 +28,8 @@ const PerceptualMap = ({ data }: PerceptualMapProps) => {
             name="Complexity" 
             domain={[-5, 5]}
             ticks={[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]}
-            label={{ value: 'Complexity', position: 'insideBottom', offset: -15, fill: "hsl(var(--foreground))", fontSize: 14 }}
-            tick={{ fill: "hsl(var(--foreground))" }}
+            label={{ value: 'Complexity', position: 'insideBottom', offset: -10, fill: "hsl(var(--foreground))", fontSize: 12 }}
+            tick={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
           />
           <YAxis 
             type="number" 
@@ -37,8 +37,8 @@ const PerceptualMap = ({ data }: PerceptualMapProps) => {
             name="Sweetness" 
             domain={[-5, 5]}
             ticks={[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]}
-            label={{ value: 'Sweetness', angle: -90, position: 'insideLeft', offset: -10, fill: "hsl(var(--foreground))", fontSize: 14 }}
-            tick={{ fill: "hsl(var(--foreground))" }}
+            label={{ value: 'Sweetness', angle: -90, position: 'insideLeft', offset: -5, fill: "hsl(var(--foreground))", fontSize: 12 }}
+            tick={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
           />
           <Tooltip 
             cursor={{ strokeDasharray: '3 3' }}

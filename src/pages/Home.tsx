@@ -153,7 +153,7 @@ const Home = () => {
             <h2 className="text-3xl font-bold">Top 5 Rekomendasi</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {topReviews.map((review, index) => (
               <div key={review.id} className="relative">
                 <div className="absolute -top-3 -left-3 z-10 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-lg">
@@ -172,6 +172,11 @@ const Home = () => {
                   image_urls={review.image_urls}
                   overall_score={review.overall_score}
                   scores={review.scores}
+                  kuah_kekentalan={review.kuah_kekentalan}
+                  kuah_kaldu={review.kuah_kaldu}
+                  kuah_keseimbangan={review.kuah_keseimbangan}
+                  mie_tekstur={review.mie_tekstur}
+                  ayam_bumbu={review.ayam_bumbu}
                 />
               </div>
             ))}
@@ -235,7 +240,7 @@ const Home = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {filteredReviews.map((review) => (
               <ReviewCard
                 key={review.id}
@@ -251,6 +256,11 @@ const Home = () => {
                 image_urls={review.image_urls}
                 overall_score={review.overall_score}
                 scores={review.scores}
+                kuah_kekentalan={review.kuah_kekentalan}
+                kuah_kaldu={review.kuah_kaldu}
+                kuah_keseimbangan={review.kuah_keseimbangan}
+                mie_tekstur={review.mie_tekstur}
+                ayam_bumbu={review.ayam_bumbu}
               />
             ))}
           </div>
