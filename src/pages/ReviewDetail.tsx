@@ -145,64 +145,90 @@ const ReviewDetail = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
       
-      <div className="container py-8">
-        <Link to="/">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Button>
-        </Link>
+      <div className="container py-6 md:py-10 max-w-7xl mx-auto px-4 md:px-6">
+        {/* Header with Back Button */}
+        <div className="mb-6">
+          <Link to="/">
+            <Button variant="ghost" className="hover:bg-accent transition-colors">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Kembali
+            </Button>
+          </Link>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Image & Info */}
-          <div className="space-y-6">
+        {/* Hero Section - Title & Overall Score */}
+        <div className="mb-8 md:mb-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 text-foreground">
+                {review.outlet_name}
+              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={review.product_type === "kuah" ? "default" : "secondary"} className="text-sm">
+                  {review.product_type === "kuah" ? "🍜 Kuah" : "🍝 Goreng"}
+                </Badge>
+                <Badge variant="outline" className="text-sm">
+                  {priceCategory.label}
+                </Badge>
+              </div>
+            </div>
+            
+            {/* Overall Score Badge - Prominent */}
+            {review.overall_score && (
+              <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-2xl p-6 shadow-lg min-w-[140px]">
+                <div className="text-sm font-medium opacity-90 mb-1">Overall Score</div>
+                <div className="text-5xl md:text-6xl font-bold">{review.overall_score.toFixed(1)}</div>
+                <div className="text-sm opacity-75 mt-1">/ 10</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Left Column - Images & Basic Info (2/3 width on desktop) */}
+          <div className="lg:col-span-2 space-y-6">
             {/* Image Carousel */}
             {((review.image_urls && review.image_urls.length > 0) || review.image_url) && (
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden shadow-md">
                 <Carousel className="w-full">
                   <CarouselContent>
                     {(review.image_urls && review.image_urls.length > 0 ? review.image_urls.slice(0, 6) : [review.image_url]).map((imgUrl: string, index: number) => (
                       <CarouselItem key={index}>
-                        <img 
-                          src={imgUrl} 
-                          alt={`${review.outlet_name} - ${index + 1}`}
-                          className="w-full h-96 object-cover"
-                        />
+                        <div className="relative aspect-video md:aspect-[16/10] bg-muted">
+                          <img 
+                            src={imgUrl} 
+                            alt={`${review.outlet_name} - ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
                   {((review.image_urls && review.image_urls.length > 1) || (!review.image_urls && review.image_url)) && (
                     <>
-                      <CarouselPrevious className="left-4" />
-                      <CarouselNext className="right-4" />
+                      <CarouselPrevious className="left-2 md:left-4" />
+                      <CarouselNext className="right-2 md:right-4" />
                     </>
                   )}
                 </Carousel>
               </Card>
             )}
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <h1 className="text-3xl font-bold">{review.outlet_name}</h1>
-                  <div className="flex gap-2 items-center">
-                    <Badge variant={review.product_type === "kuah" ? "default" : "secondary"}>
-                      {review.product_type === "kuah" ? "Kuah" : "Goreng"}
-                    </Badge>
-                    {review.overall_score && (
-                      <Badge className="bg-primary text-primary-foreground font-bold text-2xl px-4 py-2">
-                        {review.overall_score.toFixed(1)}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-muted-foreground">
-                  <div className="flex items-start">
-                    <MapPin className="mr-2 h-5 w-5 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p>{review.address}</p>
-                      <p className="font-medium text-foreground">{review.city}</p>
+            {/* Location & Visit Info */}
+            <Card className="shadow-md">
+              <CardContent className="p-5 md:p-6">
+                <h2 className="text-xl md:text-2xl font-bold mb-4 flex items-center">
+                  <MapPin className="mr-2 h-5 w-5 text-primary" />
+                  Informasi Kunjungan
+                </h2>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">{review.address}</p>
+                      <p className="font-semibold text-foreground">{review.city}</p>
                     </div>
                   </div>
 
@@ -211,114 +237,72 @@ const ReviewDetail = () => {
                       href={review.google_map_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="flex items-center text-primary hover:underline"
+                      className="inline-flex items-center gap-2 text-primary hover:underline font-medium transition-colors"
                     >
-                      <ExternalLink className="mr-2 h-4 w-4" />
+                      <ExternalLink className="h-4 w-4" />
                       Buka di Google Maps
                     </a>
                   )}
 
-                  <div className="flex items-center">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    <span>Dikunjungi: {new Date(review.visit_date).toLocaleDateString('id-ID', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</span>
-                  </div>
-
-                  <div className="flex items-center">
-                    <DollarSign className="mr-2 h-5 w-5" />
-                    <span className="font-semibold text-foreground">
-                      Rp {review.price.toLocaleString('id-ID')}
-                    </span>
-                    <Badge variant="outline" className="ml-3">
-                      {priceCategory.label}
-                    </Badge>
-                  </div>
-
-                  {review.service_durasi && (
-                    <div className="flex items-center">
-                      <Clock className="mr-2 h-5 w-5" />
-                      <span>Waktu Penyajian: {review.service_durasi} menit</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tanggal Kunjungan</p>
+                        <p className="text-sm font-medium">{new Date(review.visit_date).toLocaleDateString('id-ID', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</p>
+                      </div>
                     </div>
-                  )}
+
+                    <div className="flex items-center gap-3">
+                      <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Harga</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          Rp {review.price.toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {review.service_durasi && (
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Waktu Penyajian</p>
+                          <p className="text-sm font-medium">{review.service_durasi} menit</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {review.notes && (
-                  <div className="mt-6 pt-6 border-t">
-                    <h3 className="font-semibold mb-2">Catatan</h3>
-                    <p className="text-muted-foreground">{review.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - Scores */}
-          <div className="space-y-6">
-            {/* Generate Scorecard Button */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-3">Generate Scorecard</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Buat gambar scorecard untuk dibagikan di media sosial
-                </p>
-                <Button 
-                  onClick={generateScorecard} 
-                  disabled={generatingScorecard}
-                  className="w-full"
-                  size="lg"
-                >
-                  <ImageIcon className="mr-2 h-5 w-5" />
-                  {generatingScorecard ? "Generating..." : "Generate Scorecard"}
-                </Button>
-
-                {scorecardImage && (
-                  <div className="mt-4 space-y-3">
-                    <img 
-                      src={scorecardImage} 
-                      alt="Generated Scorecard"
-                      className="w-full rounded-lg border"
-                    />
-                    <Button 
-                      onClick={downloadScorecard}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Scorecard
-                    </Button>
+                  <div className="mt-5 pt-5 border-t">
+                    <h3 className="font-semibold mb-2 flex items-center text-foreground">
+                      💬 Catatan
+                    </h3>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{review.notes}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Overall Score & Radar Chart */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold mb-2">Overall Score</h2>
-                  {review.overall_score && (
-                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary text-primary-foreground">
-                      <span className="text-4xl font-bold">{review.overall_score.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-                <h2 className="text-2xl font-bold mb-4 text-center">Ringkasan Skor</h2>
-                <RadarChart data={review.scores} size="large" />
-              </CardContent>
-            </Card>
-
-            {/* Detailed Scores */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">Detail Penilaian</h2>
+            {/* Detailed Scores - Desktop */}
+            <Card className="shadow-md">
+              <CardContent className="p-5 md:p-6">
+                <h2 className="text-xl md:text-2xl font-bold mb-5 flex items-center">
+                  📊 Detail Penilaian
+                </h2>
                 
                 {review.product_type === "kuah" && (
-                  <div className="mb-6">
-                    <h3 className="font-semibold mb-3 text-lg">Kuah</h3>
-                    <div className="space-y-2">
+                  <div className="mb-6 pb-6 border-b">
+                    <h3 className="font-semibold mb-3 text-base md:text-lg flex items-center">
+                      🍜 Kuah
+                    </h3>
+                    <div className="space-y-3">
                       <ScoreBar label="Kekentalan" score={review.kuah_kekentalan} />
                       <ScoreBar label="Kaldu" score={review.kuah_kaldu} />
                       <ScoreBar label="Keseimbangan" score={review.kuah_keseimbangan} />
@@ -327,23 +311,29 @@ const ReviewDetail = () => {
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-3 text-lg">Mie</h3>
-                  <p className="text-sm text-muted-foreground mb-2">Tipe: {review.mie_tipe || "-"}</p>
+                <div className="mb-6 pb-6 border-b">
+                  <h3 className="font-semibold mb-3 text-base md:text-lg flex items-center">
+                    🍝 Mie
+                  </h3>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3">Tipe: {review.mie_tipe || "-"}</p>
                   <ScoreBar label="Tekstur" score={review.mie_tekstur} />
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-3 text-lg">Ayam</h3>
-                  <div className="space-y-2">
+                <div className="mb-6 pb-6 border-b">
+                  <h3 className="font-semibold mb-3 text-base md:text-lg flex items-center">
+                    🍗 Ayam
+                  </h3>
+                  <div className="space-y-3">
                     <ScoreBar label="Bumbu" score={review.ayam_bumbu} />
                     <ScoreBar label="Potongan" score={review.ayam_potongan} />
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-3 text-lg">Fasilitas</h3>
-                  <div className="space-y-2">
+                <div className={`${(review.complexity || review.sweetness) ? 'mb-6 pb-6 border-b' : ''}`}>
+                  <h3 className="font-semibold mb-3 text-base md:text-lg flex items-center">
+                    🏠 Fasilitas
+                  </h3>
+                  <div className="space-y-3">
                     <ScoreBar label="Kebersihan" score={review.fasilitas_kebersihan} />
                     <ScoreBar label="Alat Makan" score={review.fasilitas_alat_makan} />
                     <ScoreBar label="Tempat" score={review.fasilitas_tempat} />
@@ -352,11 +342,92 @@ const ReviewDetail = () => {
 
                 {(review.complexity || review.sweetness) && (
                   <div>
-                    <h3 className="font-semibold mb-3 text-lg">Perceptual Mapping</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-semibold mb-3 text-base md:text-lg flex items-center">
+                      📈 Perceptual Mapping
+                    </h3>
+                    <div className="space-y-3">
                       <ScoreBar label="Complexity" score={review.complexity} />
                       <ScoreBar label="Sweetness" score={review.sweetness} />
                     </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Scores & Actions (1/3 width on desktop) */}
+          <div className="space-y-6">
+            {/* Radar Chart */}
+            <Card className="shadow-md">
+              <CardContent className="p-5 md:p-6">
+                <h2 className="text-lg md:text-xl font-bold mb-4 text-center">
+                  Ringkasan Skor
+                </h2>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <RadarChart data={review.scores} size="large" />
+                </div>
+                
+                {/* Score Legend */}
+                <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🍜</div>
+                    <div className="text-xs text-muted-foreground">Kuah</div>
+                    <div className="text-sm font-bold text-primary">{review.scores.kuah}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🍝</div>
+                    <div className="text-xs text-muted-foreground">Mie</div>
+                    <div className="text-sm font-bold text-primary">{review.scores.mie}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🍗</div>
+                    <div className="text-xs text-muted-foreground">Ayam</div>
+                    <div className="text-sm font-bold text-primary">{review.scores.ayam}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🏠</div>
+                    <div className="text-xs text-muted-foreground">Fasilitas</div>
+                    <div className="text-sm font-bold text-primary">{review.scores.fasilitas}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Generate Scorecard */}
+            <Card className="shadow-md">
+              <CardContent className="p-5 md:p-6">
+                <h3 className="font-semibold mb-2 flex items-center">
+                  <ImageIcon className="mr-2 h-5 w-5 text-primary" />
+                  Scorecard
+                </h3>
+                <p className="text-xs md:text-sm text-muted-foreground mb-4">
+                  Generate dan bagikan scorecard ke media sosial
+                </p>
+                <Button 
+                  onClick={generateScorecard} 
+                  disabled={generatingScorecard}
+                  className="w-full hover:scale-105 transition-transform"
+                  size="lg"
+                >
+                  <ImageIcon className="mr-2 h-5 w-5" />
+                  {generatingScorecard ? "Generating..." : "Generate Scorecard"}
+                </Button>
+
+                {scorecardImage && (
+                  <div className="mt-4 space-y-3 animate-fade-in">
+                    <img 
+                      src={scorecardImage} 
+                      alt="Generated Scorecard"
+                      className="w-full rounded-lg border-2 border-primary/20 shadow-sm"
+                    />
+                    <Button 
+                      onClick={downloadScorecard}
+                      variant="outline"
+                      className="w-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Scorecard
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -369,16 +440,18 @@ const ReviewDetail = () => {
 };
 
 const ScoreBar = ({ label, score }: { label: string; score: number }) => {
+  const percentage = (score / 10) * 100;
+  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-sm font-bold text-primary">{score}/10</span>
+    <div className="group">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm md:text-base font-medium text-foreground">{label}</span>
+        <span className="text-sm md:text-base font-bold text-primary tabular-nums">{score.toFixed(1)}/10</span>
       </div>
-      <div className="h-2 bg-muted rounded-full overflow-hidden">
+      <div className="h-3 bg-muted rounded-full overflow-hidden relative">
         <div 
-          className="h-full bg-gradient-primary transition-all duration-300"
-          style={{ width: `${(score / 10) * 100}%` }}
+          className="h-full bg-gradient-primary transition-all duration-500 ease-out group-hover:opacity-90"
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>
