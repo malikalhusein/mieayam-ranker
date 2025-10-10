@@ -1,73 +1,140 @@
-# Welcome to your Lovable project
+# Mie Ayam Ranger
 
-## Project info
+Direktori review warung mie ayam dengan sistem penilaian yang adil dan transparan.
 
-**URL**: https://lovable.dev/projects/78a6629f-6bff-49c2-bccc-303d3cfcba45
+## 🚀 Features
 
-## How can I edit this code?
+- **Comprehensive Reviews**: Detailed scoring system for taste, facilities, and value
+- **Interactive Visualizations**: Perceptual mapping and radar charts
+- **Responsive Design**: Optimized for mobile, tablet, and desktop
+- **Image Galleries**: Multiple photos per review with lazy loading
+- **Advanced Filtering**: Search by name, city, or product type
+- **Accessibility**: ARIA labels, keyboard navigation, focus states
+- **Performance Optimized**: Lazy loading, code splitting, optimized builds
 
-There are several ways of editing your application.
+## 🛠️ Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Backend**: Supabase (Database, Auth, Storage)
+- **Build Tool**: Vite
+- **Charts**: Recharts
+- **State Management**: React Query
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/78a6629f-6bff-49c2-bccc-303d3cfcba45) and start prompting.
+## 📦 Installation
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+1. Clone the repository
+```bash
 git clone <YOUR_GIT_URL>
+cd mie-ayam-ranger
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies
+```bash
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Set up environment variables
+```bash
+cp .env.example .env
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Edit `.env` and add your Supabase credentials:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
+
+4. Run development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🏗️ Build for Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run build
+```
 
-**Use GitHub Codespaces**
+The build will generate:
+- Optimized production bundle in `dist/`
+- Bundle analyzer report in `dist/stats.html`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🧪 Quality Assurance
 
-## What technologies are used for this project?
+### Linting
+```bash
+npm run lint
+```
 
-This project is built with:
+### Type Checking
+```bash
+npm run type-check
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔒 Security
 
-## How can I deploy this project?
+- ✅ Input validation using Zod schemas
+- ✅ Text sanitization to prevent XSS
+- ✅ Secure Supabase RLS policies
+- ✅ Environment variables for sensitive data
+- ✅ Error boundary for runtime errors
 
-Simply open [Lovable](https://lovable.dev/projects/78a6629f-6bff-49c2-bccc-303d3cfcba45) and click on Share -> Publish.
+## ♿ Accessibility
 
-## Can I connect a custom domain to my Lovable project?
+- ARIA labels and roles
+- Keyboard navigation support
+- Focus visible states
+- High contrast color scheme
+- Semantic HTML structure
 
-Yes, you can!
+## 📱 Responsive Design
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Mobile-first approach
+- Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
+- Touch-friendly UI elements
+- Optimized images with lazy loading
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🎨 Design System
+
+Colors follow a warm, food-inspired palette:
+- **Primary**: Warm amber/orange (mie)
+- **Secondary**: Deep red (ayam)
+- **Accent**: Fresh green
+
+All colors use HSL format for consistency and accessibility.
+
+## 📊 Performance
+
+- Lazy-loaded routes
+- Image lazy loading
+- Code splitting
+- Optimized bundle size
+- Cached assets
+
+## 🚀 Deployment
+
+Deploy to Lovable:
+1. Visit your [Lovable Project](https://lovable.dev/projects/78a6629f-6bff-49c2-bccc-303d3cfcba45)
+2. Click Share → Publish
+3. Configure custom domain in Project Settings if needed
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run linting and tests
+5. Submit a pull request
+
+## 📄 CI/CD
+
+GitHub Actions workflow automatically:
+- Runs ESLint on pull requests
+- Builds the project
+- Uploads build artifacts
+
+## 🙏 Acknowledgments
+
+- shadcn/ui for beautiful components
+- Supabase for backend infrastructure
+- Recharts for data visualization

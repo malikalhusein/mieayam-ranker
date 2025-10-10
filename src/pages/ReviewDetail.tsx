@@ -7,13 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { MapPin, Calendar, DollarSign, Clock, ArrowLeft, ExternalLink, Image as ImageIcon, Download } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MapPin, Calendar, DollarSign, Clock, ArrowLeft, ExternalLink, Image as ImageIcon, Download, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ReviewDetail = () => {
   const { id } = useParams();
   const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [generatingScorecard, setGeneratingScorecard] = useState(false);
   const [scorecardImage, setScorecardImage] = useState<string | null>(null);
   const { toast } = useToast();
@@ -34,10 +37,13 @@ const ReviewDetail = () => {
 
       const scores = calculateScores(data);
       setReview({ ...data, scores });
+      setError(null);
     } catch (error: any) {
+      const errorMessage = error.message || "Gagal memuat detail review";
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -118,8 +124,19 @@ const ReviewDetail = () => {
     return (
       <div className="min-h-screen bg-gradient-subtle">
         <Navbar />
-        <div className="container py-20 text-center">
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="container py-10 max-w-7xl mx-auto px-4 md:px-6">
+          <Skeleton className="h-10 w-32 mb-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="aspect-video w-full" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-96 w-full" />
+            </div>
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -129,10 +146,16 @@ const ReviewDetail = () => {
     return (
       <div className="min-h-screen bg-gradient-subtle">
         <Navbar />
-        <div className="container py-20 text-center">
-          <p className="text-muted-foreground">Review tidak ditemukan</p>
+        <div className="container py-20 text-center max-w-2xl mx-auto">
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <p className="text-muted-foreground mb-4">Review tidak ditemukan</p>
           <Link to="/">
-            <Button className="mt-4">Kembali ke Home</Button>
+            <Button>Kembali ke Home</Button>
           </Link>
         </div>
       </div>
@@ -198,8 +221,9 @@ const ReviewDetail = () => {
                         <div className="relative aspect-video md:aspect-[16/10] bg-muted">
                           <img 
                             src={imgUrl} 
-                            alt={`${review.outlet_name} - ${index + 1}`}
+                            alt={`${review.outlet_name} - Foto ${index + 1} dari ${review.image_urls?.length || 1}`}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                         </div>
                       </CarouselItem>

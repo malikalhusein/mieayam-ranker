@@ -6,14 +6,17 @@ import PerceptualMap from "@/components/PerceptualMap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trophy, TrendingUp, Search } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Trophy, TrendingUp, Search, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Home = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [topReviews, setTopReviews] = useState<any[]>([]);
   const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cityFilter, setCityFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -44,10 +47,13 @@ const Home = () => {
       // Get top 5 based on score
       const sorted = [...processedReviews].sort((a, b) => b.totalScore - a.totalScore);
       setTopReviews(sorted.slice(0, 5));
+      setError(null);
     } catch (error: any) {
+      const errorMessage = error.message || "Gagal memuat data review";
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -116,8 +122,24 @@ const Home = () => {
     return (
       <div className="min-h-screen bg-gradient-subtle">
         <Navbar />
-        <div className="container py-20 text-center">
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="container py-10">
+          {/* Hero Skeleton */}
+          <div className="mb-8 space-y-4">
+            <Skeleton className="h-12 w-3/4 mx-auto" />
+            <Skeleton className="h-6 w-1/2 mx-auto" />
+          </div>
+          
+          {/* Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -127,18 +149,35 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <Navbar />
       
+      {/* Error Alert */}
+      {error && (
+        <div className="container pt-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}. Silakan coba lagi nanti atau hubungi tim kami jika masalah berlanjut.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero py-20">
+      <section className="relative overflow-hidden bg-gradient-hero py-20" role="banner">
         <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h1 className="text-5xl font-bold mb-6 drop-shadow-lg">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">
               Mie Ayam Ranger
             </h1>
-            <p className="text-xl mb-8 text-white/90">
+            <p className="text-lg md:text-xl mb-8 text-white/90">
               Direktori review warung mie ayam dengan sistem penilaian yang adil dan transparan
             </p>
-            <Button size="lg" variant="secondary" className="shadow-glow">
-              <TrendingUp className="mr-2 h-5 w-5" />
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="shadow-glow focus-visible:ring-2 focus-visible:ring-offset-2"
+              aria-label="Explore all reviews"
+            >
+              <TrendingUp className="mr-2 h-5 w-5" aria-hidden="true" />
               Explore Reviews
             </Button>
           </div>
@@ -147,10 +186,10 @@ const Home = () => {
 
       {/* Top 5 Section */}
       {topReviews.length > 0 && (
-        <section className="container py-16">
+        <section className="container py-16" aria-labelledby="top-5-heading">
           <div className="flex items-center justify-center mb-8">
-            <Trophy className="h-8 w-8 text-primary mr-3" />
-            <h2 className="text-3xl font-bold">Top 5 Rekomendasi</h2>
+            <Trophy className="h-8 w-8 text-primary mr-3" aria-hidden="true" />
+            <h2 id="top-5-heading" className="text-2xl md:text-3xl font-bold">Top 5 Rekomendasi</h2>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -186,26 +225,28 @@ const Home = () => {
 
       {/* Perceptual Map */}
       {perceptualData.length > 0 && (
-        <section className="container py-16">
-          <div className="bg-card rounded-xl p-8 shadow-card">
+        <section className="container py-16" aria-labelledby="perceptual-map-heading">
+          <div className="bg-card rounded-xl p-6 md:p-8 shadow-card">
+            <h2 id="perceptual-map-heading" className="sr-only">Perceptual Mapping</h2>
             <PerceptualMap data={perceptualData} />
           </div>
         </section>
       )}
 
       {/* All Reviews Grid */}
-      <section className="container py-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">Semua Review</h2>
+      <section className="container py-16" aria-labelledby="all-reviews-heading">
+        <h2 id="all-reviews-heading" className="text-2xl md:text-3xl font-bold mb-8 text-center">Semua Review</h2>
         
         {/* Filters */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4" role="search" aria-label="Filter reviews">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               placeholder="Cari nama outlet, alamat, kota..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              aria-label="Search reviews by name, address, or city"
             />
           </div>
           
